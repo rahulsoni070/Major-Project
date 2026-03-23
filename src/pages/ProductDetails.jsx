@@ -1,68 +1,58 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { BASE_URL } from "../utils/api";
+import { getStableImage } from "../utils/productImages";
 
-function ProductDetails() {
+function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadProduct() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const res = await fetch(`${BASE_URL}/api/products`);
-        if (!res.ok) throw new Error(`Failed: ${res.status}`);
-
-        const data = await res.json();
-        const products = Array.isArray(data) ? data : data?.data?.products || [];
-        const found = products.find((p) => (p._id || p.id) === id);
-
-        if (!found) {
-          setError("Product not found");
-        } else {
-          setProduct(found);
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load product details");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadProduct();
+    (async () => {
+      const res = await fetch(`${BASE_URL}/api/products`);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setProduct(list.find((p) => String(p._id || p.id) === String(id)));
+    })();
   }, [id]);
 
-  if (loading) return <div className="container py-5"><h5>Loading product...</h5></div>;
-  if (error) return <div className="container py-5"><h5 className="text-danger">{error}</h5></div>;
+  if (!product) return <div className="container py-5">Loading product...</div>;
+
+  const pid = product._id || product.id;
+  const inCart = cart.some((i) => (i._id || i.id) === pid);
+  const inWishlist = wishlist.some((i) => (i._id || i.id) === pid);
+
+  function addToCart() {
+    setCart((prev) => {
+      const existing = prev.find((p) => (p._id || p.id) === pid);
+      if (existing) return prev.map((p) => ((p._id || p.id) === pid ? { ...p, quantity: (p.quantity || 1) + 1 } : p));
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  }
+
+  function addToWishlist() {
+    setWishlist((prev) => (prev.some((p) => (p._id || p.id) === pid) ? prev : [...prev, product]));
+  }
 
   return (
     <div className="container py-4">
       <Link to="/products" className="btn btn-outline-secondary mb-3">← Back to Products</Link>
-
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="row g-0">
-          <div className="col-md-5">
-            <img
-              src={product.image}
-              alt={product.title}
-              className="w-100 h-100"
-              style={{ objectFit: "cover", minHeight: "360px" }}
-            />
+          <div className="col-md-4">
+            <img src={getStableImage(product)} alt={product.title} className="w-100 h-100" style={{ objectFit: "cover", minHeight: 380 }} />
           </div>
-          <div className="col-md-7">
+          <div className="col-md-8">
             <div className="card-body p-4">
-              <h3 className="fw-bold">{product.title}</h3>
+              <h2 className="fw-bold">{product.title}</h2>
               <p className="text-muted mb-2">Category: {product.category}</p>
-              <h4 className="text-primary mb-3">₹ {product.price}</h4>
-              <p className="mb-3">⭐ {product.rating}</p>
-              <p className="mb-0">
-                Premium quality product for your daily use.
-              </p>
+              <h3 className="text-primary">₹ {product.price}</h3>
+              <p>⭐ {product.rating}</p>
+              <p>Premium quality product for your daily use.</p>
+              <div className="d-flex gap-2">
+                <button className="btn btn-primary" onClick={addToCart} disabled={inCart}>{inCart ? "Already in Cart" : "Add to Cart"}</button>
+                <button className="btn btn-outline-danger" onClick={addToWishlist} disabled={inWishlist}>{inWishlist ? "In Wishlist" : "Add to Wishlist"}</button>
+              </div>
             </div>
           </div>
         </div>

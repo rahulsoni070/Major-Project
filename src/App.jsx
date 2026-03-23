@@ -7,33 +7,17 @@ import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
+import "./App.css";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cart, setCart] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("cart")) || [];
-    } catch {
-      return [];
-    }
-  });
-  const [wishlist, setWishlist] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("wishlist")) || [];
-    } catch {
-      return [];
-    }
-  });
+  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem("cart") || "[]"));
+  const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem("wishlist") || "[]"));
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
+  useEffect(() => localStorage.setItem("wishlist", JSON.stringify(wishlist)), [wishlist]);
 
   return (
     <div className="app-shell">
@@ -76,14 +60,7 @@ function App() {
           <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
           <Route
             path="/wishlist"
-            element={
-              <Wishlist
-                wishlist={wishlist}
-                setWishlist={setWishlist}
-                cart={cart}
-                setCart={setCart}
-              />
-            }
+            element={<Wishlist wishlist={wishlist} setWishlist={setWishlist} cart={cart} setCart={setCart} />}
           />
 
           <Route path="/profile" element={<Profile />} />
