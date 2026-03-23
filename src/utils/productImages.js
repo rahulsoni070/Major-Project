@@ -7,8 +7,5 @@ export const productImageMap = {
 };
 
 export function getStableImage(product) {
-  return (
-    productImageMap[product?.title] ||
-    "https://via.placeholder.com/800x800?text=Product"
-  );
+  return productImageMap[product?.title] || "https://via.placeholder.com/800x800?text=Product";
 }
