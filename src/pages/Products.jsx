@@ -1,22 +1,34 @@
-import { useState } from "react";
-import { products } from "../services/products";
+import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 
+const BASE_URL = "https://m-ecommerce-backend.vercel.app";
+
 function Products({ cart, setCart, wishlist, setWishlist, searchTerm }) {
+  const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [minRating, setMinRating] = useState(0);
   const [sortByPrice, setSortByPrice] = useState(null);
 
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data.data.products); 
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   let filteredProducts = products
-  .filter((product) =>
-    selectedCategory === "all"
-      ? true
-      : product.category === selectedCategory
-  )
-  .filter((product) => product.rating >= minRating)
-  .filter((product) =>
-    product.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    .filter((product) =>
+      selectedCategory === "all"
+        ? true
+        : product.category === selectedCategory
+    )
+    .filter((product) => product.rating >= minRating)
+    .filter((product) =>
+      product.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   if (sortByPrice === "lowToHigh") {
     filteredProducts = [...filteredProducts].sort(
@@ -150,14 +162,11 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm }) {
           {filteredProducts.length === 0 ? (
             <div className="card shadow-sm p-5 text-center">
               <h5 className="mb-2">No products found</h5>
-              <p className="text-muted mb-0">
-                Try adjusting your filters
-              </p>
             </div>
           ) : (
             <div className="row g-4">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="col-6 col-lg-4">
+                <div key={product._id} className="col-6 col-lg-4">
                   <ProductCard
                     product={product}
                     addToCart={addToCart}
