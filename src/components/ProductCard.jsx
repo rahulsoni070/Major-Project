@@ -17,19 +17,23 @@ function ProductCard({ product, setCart, setWishlist }) {
       const res = await fetch(`${BASE_URL}/api/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+        body: JSON.stringify({ productId }),
       });
 
+      const raw = await res.text();
+      let data = {};
+      try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Cart failed ${res.status}: ${txt}`);
+        console.error("Cart API error:", data);
+        alert(`Unable to add to cart. ${data?.message || `Status ${res.status}`}`);
+        return;
       }
 
-      const data = await res.json();
       setCart(extractCart(data));
     } catch (err) {
       console.error("Add to cart error:", err);
-      alert("Unable to add to cart. Check backend route/response.");
+      alert("Unable to add to cart. Network/server error.");
     }
   }
 
@@ -38,19 +42,23 @@ function ProductCard({ product, setCart, setWishlist }) {
       const res = await fetch(`${BASE_URL}/api/wishlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+        body: JSON.stringify({ productId }),
       });
 
+      const raw = await res.text();
+      let data = {};
+      try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Wishlist failed ${res.status}: ${txt}`);
+        console.error("Wishlist API error:", data);
+        alert(`Unable to add to wishlist. ${data?.message || `Status ${res.status}`}`);
+        return;
       }
 
-      const data = await res.json();
       setWishlist(extractWishlist(data));
     } catch (err) {
       console.error("Add to wishlist error:", err);
-      alert("Unable to add to wishlist. Check backend route/response.");
+      alert("Unable to add to wishlist. Network/server error.");
     }
   }
 
