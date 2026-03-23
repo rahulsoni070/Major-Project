@@ -1,25 +1,46 @@
-import { useEffect } from "react";
-
-const BASE_URL = "https://m-ecommerce-backend.vercel.app";
+import { useEffect, useState } from "react";
+import { BASE_URL } from "../utils/api";
 
 function Wishlist({ wishlist, setWishlist, cart, setCart }) {
+  const [loading, setLoading] = useState(true);
+
+  function extractWishlist(data) {
+    return data?.data?.wishlist || data?.wishlist || (Array.isArray(data) ? data : []);
+  }
+
+  function extractCart(data) {
+    return data?.data?.cart || data?.cart || (Array.isArray(data) ? data : []);
+  }
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/wishlist`)
-      .then((res) => res.json())
-      .then((data) => setWishlist(data.data.wishlist))
-      .catch((err) => console.error(err));
-  }, []);
+    async function loadWishlist() {
+      try {
+        setLoading(true);
+        const res = await fetch(`${BASE_URL}/api/wishlist`);
+        if (!res.ok) throw new Error(`Wishlist fetch failed: ${res.status}`);
+        const data = await res.json();
+        setWishlist(extractWishlist(data));
+      } catch (err) {
+        console.error("Load wishlist error:", err);
+        setWishlist([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadWishlist();
+  }, [setWishlist]);
 
   async function removeFromWishlist(id) {
     try {
       const res = await fetch(`${BASE_URL}/api/wishlist/${id}`, {
         method: "DELETE",
       });
+      if (!res.ok) throw new Error(`Remove wishlist failed: ${res.status}`);
       const data = await res.json();
-      setWishlist(data.data.wishlist);
+      setWishlist(extractWishlist(data));
     } catch (err) {
-      console.error(err);
+      console.error("Remove from wishlist error:", err);
     }
   }
 
@@ -33,22 +54,33 @@ function Wishlist({ wishlist, setWishlist, cart, setCart }) {
         body: JSON.stringify(product),
       });
 
+      if (!res.ok) throw new Error(`Move to cart failed: ${res.status}`);
+
       const cartData = await res.json();
-      setCart(cartData.data.cart);
+      setCart(extractCart(cartData));
 
-      await removeFromWishlist(product._id);
-
+      await removeFromWishlist(product._id || product.id);
     } catch (err) {
-      console.error(err);
+      console.error("Move to cart error:", err);
     }
   }
 
-  if (wishlist.length === 0) {
+  if (loading) {
     return (
       <div className="container py-5">
-        <h2 className="mb-4">Your Wishlist</h2>
+        <h2 className="mb-4 fw-bold">Your Wishlist</h2>
+        <div className="card border-0 shadow-sm rounded-4 p-5 text-center">
+          <h5 className="mb-0">Loading wishlist...</h5>
+        </div>
+      </div>
+    );
+  }
 
-        <div className="card shadow-sm p-5 text-center">
+  if (!wishlist || wishlist.length === 0) {
+    return (
+      <div className="container py-5">
+        <h2 className="mb-4 fw-bold">Your Wishlist</h2>
+        <div className="card border-0 shadow-sm rounded-4 p-5 text-center">
           <h5 className="mb-0">Your wishlist is empty</h5>
         </div>
       </div>
@@ -56,31 +88,46 @@ function Wishlist({ wishlist, setWishlist, cart, setCart }) {
   }
 
   return (
-    <div className="container mt-4">
-      <h2>Your Wishlist</h2>
+    <div className="container py-4">
+      <h2 className="mb-4 fw-bold">Your Wishlist</h2>
 
-      {wishlist.map((item) => (
-        <div key={item._id} className="card mb-3">
-          <div className="card-body">
-            <h5>{item.title}</h5>
-            <p>₹ {item.price}</p>
+      <div className="row g-4">
+        {wishlist.map((item) => {
+          const itemId = item._id || item.id;
+          const inCart = cart?.some((c) => (c._id || c.id) === itemId);
 
-            <button
-              className="btn btn-primary btn-sm me-2"
-              onClick={() => moveToCart(item)}
-            >
-              Move to Cart
-            </button>
+          return (
+            <div key={itemId} className="col-12 col-md-6 col-lg-4">
+              <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  style={{ height: "220px", objectFit: "cover" }}
+                />
+                <div className="card-body d-flex flex-column">
+                  <h6 className="mb-1">{item.title}</h6>
+                  <p className="fw-semibold text-primary mb-3">₹ {item.price}</p>
 
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => removeFromWishlist(item._id)}
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ))}
+                  <button
+                    className="btn btn-primary rounded-3 mb-2"
+                    onClick={() => moveToCart(item)}
+                    disabled={inCart}
+                  >
+                    {inCart ? "Already in Cart" : "Move to Cart"}
+                  </button>
+
+                  <button
+                    className="btn btn-outline-danger rounded-3"
+                    onClick={() => removeFromWishlist(itemId)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

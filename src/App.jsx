@@ -16,68 +16,67 @@ function App() {
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   return (
-    <>
+    <div className="app-shell">
       <Navbar
-      cart={cart}
-      wishlist={wishlist}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-    />
+        cart={cart}
+        wishlist={wishlist}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/products" />} />
+      <main className="pb-5">
+        <Routes>
+          <Route path="/" element={<Navigate to="/products" replace />} />
 
-        <Route
-          path="/products"
-          element={
-            <Products
-          cart={cart}
-          setCart={setCart}
-          wishlist={wishlist}
-          setWishlist={setWishlist}
-          searchTerm={searchTerm}
-        />
-          }
-        />
+          <Route
+            path="/products"
+            element={
+              <Products
+                cart={cart}
+                setCart={setCart}
+                wishlist={wishlist}
+                setWishlist={setWishlist}
+                searchTerm={searchTerm}
+              />
+            }
+          />
 
-        <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
 
-        <Route
-          path="/cart"
-          element={<Cart cart={cart} setCart={setCart} />}
-        />
+          <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
 
-        <Route
-          path="/wishlist"
-          element={
-            <Wishlist
-              wishlist={wishlist}
-              setWishlist={setWishlist}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
+          <Route
+            path="/wishlist"
+            element={
+              <Wishlist
+                wishlist={wishlist}
+                setWishlist={setWishlist}
+                cart={cart}
+                setCart={setCart}
+              />
+            }
+          />
 
-        <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
 
-        <Route
-          path="/checkout"
-          element={
-            <Checkout
-              cart={cart}
-              setCart={setCart}
-              addresses={addresses}
-              setAddresses={setAddresses}
-              selectedAddressId={selectedAddressId}
-              setSelectedAddressId={setSelectedAddressId}
-            />
-          }
-        />
+          <Route
+            path="/checkout"
+            element={
+              <Checkout
+                cart={cart}
+                setCart={setCart}
+                addresses={addresses}
+                setAddresses={setAddresses}
+                selectedAddressId={selectedAddressId}
+                setSelectedAddressId={setSelectedAddressId}
+              />
+            }
+          />
 
-        <Route path="*" element={<Navigate to="/products" />} />
-      </Routes>
-    </>
+          <Route path="*" element={<Navigate to="/products" replace />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
 
