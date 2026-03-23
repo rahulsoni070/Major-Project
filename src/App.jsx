@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
@@ -10,10 +10,30 @@ import Checkout from "./pages/Checkout";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    } catch {
+      return [];
+    }
+  });
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
 
   return (
     <div className="app-shell">
@@ -41,10 +61,19 @@ function App() {
             }
           />
 
-          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route
+            path="/products/:id"
+            element={
+              <ProductDetails
+                cart={cart}
+                setCart={setCart}
+                wishlist={wishlist}
+                setWishlist={setWishlist}
+              />
+            }
+          />
 
           <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
-
           <Route
             path="/wishlist"
             element={
@@ -58,7 +87,6 @@ function App() {
           />
 
           <Route path="/profile" element={<Profile />} />
-
           <Route
             path="/checkout"
             element={
