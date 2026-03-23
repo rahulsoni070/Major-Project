@@ -20,8 +20,6 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm = "" }) {
         if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
 
         const data = await res.json();
-
-        // Backend response is an array
         setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
@@ -40,35 +38,21 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm = "" }) {
     )
     .filter((product) => Number(product.rating) >= minRating)
     .filter((product) =>
-      (product.title || "").toLowerCase().includes((searchTerm || "").toLowerCase())
+      (product.title || "")
+        .toLowerCase()
+        .includes((searchTerm || "").toLowerCase())
     );
 
   if (sortByPrice === "lowToHigh") {
-    filteredProducts = [...filteredProducts].sort((a, b) => Number(a.price) - Number(b.price));
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => Number(a.price) - Number(b.price)
+    );
   }
 
   if (sortByPrice === "highToLow") {
-    filteredProducts = [...filteredProducts].sort((a, b) => Number(b.price) - Number(a.price));
-  }
-
-  function addToCart(product) {
-    const id = product._id || product.id;
-    const existingItem = cart.find((item) => (item._id || item.id) === id);
-
-    if (existingItem) {
-      const updatedCart = cart.map((item) =>
-        (item._id || item.id) === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
-      );
-      setCart(updatedCart);
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
-  }
-
-  function addToWishlist(product) {
-    const id = product._id || product.id;
-    const exists = wishlist.find((item) => (item._id || item.id) === id);
-    if (!exists) setWishlist([...wishlist, product]);
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => Number(b.price) - Number(a.price)
+    );
   }
 
   return (
@@ -124,7 +108,9 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm = "" }) {
                   onChange={() => setSortByPrice("lowToHigh")}
                   id="lowToHigh"
                 />
-                <label className="form-check-label" htmlFor="lowToHigh">Low to High</label>
+                <label className="form-check-label" htmlFor="lowToHigh">
+                  Low to High
+                </label>
               </div>
               <div className="form-check">
                 <input
@@ -135,7 +121,9 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm = "" }) {
                   onChange={() => setSortByPrice("highToLow")}
                   id="highToLow"
                 />
-                <label className="form-check-label" htmlFor="highToLow">High to Low</label>
+                <label className="form-check-label" htmlFor="highToLow">
+                  High to Low
+                </label>
               </div>
             </div>
 
@@ -171,8 +159,8 @@ function Products({ cart, setCart, wishlist, setWishlist, searchTerm = "" }) {
                 <div key={product._id || product.id} className="col-12 col-sm-6 col-lg-4">
                   <ProductCard
                     product={product}
-                    addToCart={addToCart}
-                    addToWishlist={addToWishlist}
+                    setCart={setCart}
+                    setWishlist={setWishlist}
                   />
                 </div>
               ))}

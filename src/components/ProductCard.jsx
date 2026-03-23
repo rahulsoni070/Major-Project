@@ -17,23 +17,45 @@ function ProductCard({ product, setCart, setWishlist }) {
       const res = await fetch(`${BASE_URL}/api/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify(product),
       });
 
-      const raw = await res.text();
-      let data = {};
-      try { data = JSON.parse(raw); } catch { data = { message: raw }; }
-
       if (!res.ok) {
-        console.error("Cart API error:", data);
-        alert(`Unable to add to cart. ${data?.message || `Status ${res.status}`}`);
-        return;
+        const txt = await res.text();
+        throw new Error(`Cart failed ${res.status}: ${txt}`);
       }
 
-      setCart(extractCart(data));
+      const data = await res.json();
+      const updatedCart = extractCart(data);
+
+      if (Array.isArray(updatedCart)) {
+        setCart(updatedCart);
+      } else {
+        setCart((prev) => {
+          const existing = prev.find((p) => (p._id || p.id) === productId);
+          if (existing) {
+            return prev.map((p) =>
+              (p._id || p.id) === productId
+                ? { ...p, quantity: (p.quantity || 1) + 1 }
+                : p
+            );
+          }
+          return [...prev, { ...product, quantity: 1 }];
+        });
+      }
     } catch (err) {
       console.error("Add to cart error:", err);
-      alert("Unable to add to cart. Network/server error.");
+      setCart((prev) => {
+        const existing = prev.find((p) => (p._id || p.id) === productId);
+        if (existing) {
+          return prev.map((p) =>
+            (p._id || p.id) === productId
+              ? { ...p, quantity: (p.quantity || 1) + 1 }
+              : p
+          );
+        }
+        return [...prev, { ...product, quantity: 1 }];
+      });
     }
   }
 
@@ -42,23 +64,31 @@ function ProductCard({ product, setCart, setWishlist }) {
       const res = await fetch(`${BASE_URL}/api/wishlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify(product),
       });
 
-      const raw = await res.text();
-      let data = {};
-      try { data = JSON.parse(raw); } catch { data = { message: raw }; }
-
       if (!res.ok) {
-        console.error("Wishlist API error:", data);
-        alert(`Unable to add to wishlist. ${data?.message || `Status ${res.status}`}`);
-        return;
+        const txt = await res.text();
+        throw new Error(`Wishlist failed ${res.status}: ${txt}`);
       }
 
-      setWishlist(extractWishlist(data));
+      const data = await res.json();
+      const updatedWishlist = extractWishlist(data);
+
+      if (Array.isArray(updatedWishlist)) {
+        setWishlist(updatedWishlist);
+      } else {
+        setWishlist((prev) => {
+          const exists = prev.some((p) => (p._id || p.id) === productId);
+          return exists ? prev : [...prev, product];
+        });
+      }
     } catch (err) {
       console.error("Add to wishlist error:", err);
-      alert("Unable to add to wishlist. Network/server error.");
+      setWishlist((prev) => {
+        const exists = prev.some((p) => (p._id || p.id) === productId);
+        return exists ? prev : [...prev, product];
+      });
     }
   }
 
