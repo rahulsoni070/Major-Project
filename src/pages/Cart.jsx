@@ -1,52 +1,153 @@
 import { useNavigate } from "react-router-dom";
 import { getStableImage } from "../utils/productImages";
 
-function Cart({ cart, setCart }) {
+function Cart({ cart, setCart, wishlist = [], setWishlist = () => {} }) {
   const navigate = useNavigate();
 
-  const inc = (id) => setCart((prev) => prev.map((i) => ((i._id || i.id) === id ? { ...i, quantity: i.quantity + 1 } : i)));
-  const dec = (id) =>
+  const increaseQty = (id) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        (item._id || item.id) === id
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item
+      )
+    );
+  };
+
+  const decreaseQty = (id) => {
     setCart((prev) =>
       prev
-        .map((i) => ((i._id || i.id) === id ? { ...i, quantity: i.quantity - 1 } : i))
-        .filter((i) => i.quantity > 0)
+        .map((item) =>
+          (item._id || item.id) === id
+            ? { ...item, quantity: (item.quantity || 1) - 1 }
+            : item
+        )
+        .filter((item) => (item.quantity || 1) > 0)
     );
-  const remove = (id) => setCart((prev) => prev.filter((i) => (i._id || i.id) !== id));
+  };
 
-  const total = cart.reduce((t, i) => t + Number(i.price) * Number(i.quantity), 0);
+  const removeFromCart = (id) => {
+    setCart((prev) => prev.filter((item) => (item._id || item.id) !== id));
+  };
 
-  if (!cart.length) return <div className="container py-5"><h5>Your cart is empty</h5></div>;
+  const moveToWishlist = (item) => {
+    const id = item._id || item.id;
+    setWishlist((prev) => {
+      const exists = prev.some((w) => (w._id || w.id) === id);
+      return exists ? prev : [...prev, item];
+    });
+    removeFromCart(id);
+  };
+
+  const totalItems = cart.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+    0
+  );
+  const discount = Math.round(subtotal * 0.1);
+  const delivery = subtotal > 0 ? 99 : 0;
+  const totalAmount = subtotal - discount + delivery;
+
+  if (!cart.length) {
+    return (
+      <div className="container py-5">
+        <h3 className="fw-bold mb-3">MY CART (0)</h3>
+        <div className="card p-5 text-center border-0 shadow-sm rounded-4">
+          Your cart is empty
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-4">
-      <h2 className="mb-4 fw-bold">Your Cart</h2>
+      <h4 className="fw-bold text-center mb-4">MY CART ({totalItems})</h4>
+
       <div className="row g-4">
-        <div className="col-lg-8">
+        {/* Left: cart items */}
+        <div className="col-lg-7">
           {cart.map((item) => {
             const id = item._id || item.id;
+            const price = Number(item.price || 0);
+            const original = Math.round(price * 1.5);
+
             return (
-              <div key={id} className="card p-3 mb-3">
-                <div className="d-flex align-items-center gap-3">
-                  <img src={getStableImage(item)} alt={item.title} style={{ width: 90, height: 90, objectFit: "cover", borderRadius: 10 }} />
-                  <div className="flex-grow-1">
-                    <h6>{item.title}</h6>
-                    <p className="text-primary fw-bold mb-2">₹ {item.price}</p>
-                    <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => dec(id)}>−</button>
-                    <span>{item.quantity}</span>
-                    <button className="btn btn-sm btn-outline-secondary ms-2" onClick={() => inc(id)}>+</button>
+              <div key={id} className="card border-0 shadow-sm rounded-3 p-3 mb-3">
+                <div className="row g-3 align-items-center">
+                  <div className="col-4 col-md-3">
+                    <img
+                      src={getStableImage(item)}
+                      alt={item.title}
+                      className="w-100 rounded-2"
+                      style={{ height: 140, objectFit: "cover" }}
+                    />
                   </div>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => remove(id)}>Remove</button>
+
+                  <div className="col-8 col-md-9">
+                    <h6 className="mb-1">{item.title}</h6>
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <span className="fw-bold fs-5">₹{price}</span>
+                      <small className="text-muted text-decoration-line-through">₹{original}</small>
+                    </div>
+                    <small className="text-success">50% off</small>
+
+                    <div className="d-flex align-items-center gap-2 mt-2 mb-3">
+                      <small className="fw-semibold">Quantity:</small>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => decreaseQty(id)}>−</button>
+                      <span>{item.quantity || 1}</span>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => increaseQty(id)}>+</button>
+                    </div>
+
+                    <div className="d-grid gap-2 d-md-flex">
+                      <button
+                        className="btn btn-outline-dark btn-sm"
+                        onClick={() => removeFromCart(id)}
+                      >
+                        Remove from Cart
+                      </button>
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => moveToWishlist(item)}
+                      >
+                        Move to Wishlist
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="col-lg-4">
-          <div className="card p-3 sticky-top" style={{ top: 90 }}>
-            <h5>Price Details</h5>
-            <p>Total Items: {cart.length}</p>
-            <h4>Total Price: ₹ {total}</h4>
-            <button className="btn btn-success w-100" onClick={() => navigate("/checkout")}>Proceed to Checkout</button>
+
+        {/* Right: price details */}
+        <div className="col-lg-5">
+          <div className="card border-0 shadow-sm rounded-3 p-3 sticky-top" style={{ top: 90 }}>
+            <h6 className="fw-bold mb-3">PRICE DETAILS</h6>
+            <div className="d-flex justify-content-between mb-2">
+              <span>Price ({totalItems} item)</span>
+              <span>₹{subtotal}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-2">
+              <span>Discount</span>
+              <span className="text-success">− ₹{discount}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-3">
+              <span>Delivery Charges</span>
+              <span>₹{delivery}</span>
+            </div>
+
+            <hr />
+            <div className="d-flex justify-content-between fw-bold mb-2">
+              <span>TOTAL AMOUNT</span>
+              <span>₹{totalAmount}</span>
+            </div>
+            <small className="text-success d-block mb-3">
+              You will save ₹{discount} on this order
+            </small>
+
+            <button className="btn btn-primary w-100" onClick={() => navigate("/checkout")}>
+              PLACE ORDER
+            </button>
           </div>
         </div>
       </div>
