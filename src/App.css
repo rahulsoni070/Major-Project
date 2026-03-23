@@ -1,3 +1,8 @@
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 #root {
   display: flex;
@@ -6,8 +11,18 @@
 
 .app-shell {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;  
   margin: 0 auto;
+}
+
+.app-shell .container,
+.app-shell .container-fluid {
+  width: 100%;
+  max-width: 1320px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 body {
@@ -15,14 +30,7 @@ body {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-.navbar .container,
-.container {
-  max-width: 1240px !important;
-}
-
-.navbar {
-  border-bottom: 1px solid #e5e7eb;
-}
+.navbar { border-bottom: 1px solid #e5e7eb; }
 
 .card {
   border-radius: 12px !important;
@@ -45,6 +53,4 @@ body {
   color: #ef4444;
 }
 
-h2, h3, h4, h5, h6 {
-  color: #111827;
-}
+h2, h3, h4, h5, h6 { color: #111827; }
