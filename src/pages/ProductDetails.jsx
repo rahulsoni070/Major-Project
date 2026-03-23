@@ -1,48 +1,70 @@
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-const BASE_URL = "https://m-ecommerce-backend.vercel.app";
+import { useParams, Link } from "react-router-dom";
+import { BASE_URL } from "../utils/api";
 
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProduct(data.data.product);
-      })
-      .catch((err) => console.error(err));
+    async function loadProduct() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await fetch(`${BASE_URL}/api/products`);
+        if (!res.ok) throw new Error(`Failed: ${res.status}`);
+
+        const data = await res.json();
+        const products = Array.isArray(data) ? data : data?.data?.products || [];
+        const found = products.find((p) => (p._id || p.id) === id);
+
+        if (!found) {
+          setError("Product not found");
+        } else {
+          setProduct(found);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load product details");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProduct();
   }, [id]);
 
-  if (!product) {
-    return <h2 className="text-center mt-5">Loading...</h2>;
-  }
+  if (loading) return <div className="container py-5"><h5>Loading product...</h5></div>;
+  if (error) return <div className="container py-5"><h5 className="text-danger">{error}</h5></div>;
 
   return (
-    <div className="container mt-4">
-      <div className="row">
-        <div className="col-md-6">
-          <img
-            src={product.image}
-            alt={product.title}
-            className="img-fluid"
-          />
-        </div>
+    <div className="container py-4">
+      <Link to="/products" className="btn btn-outline-secondary mb-3">← Back to Products</Link>
 
-        <div className="col-md-6">
-          <h2>{product.title}</h2>
-          <p>Price: ₹ {product.price}</p>
-          <p>Rating: ⭐ {product.rating}</p>
-          <p>Category: {product.category}</p>
-
-          <button className="btn btn-primary me-2">
-            Add to Cart
-          </button>
-          <button className="btn btn-outline-secondary">
-            Add to Wishlist
-          </button>
+      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div className="row g-0">
+          <div className="col-md-5">
+            <img
+              src={product.image}
+              alt={product.title}
+              className="w-100 h-100"
+              style={{ objectFit: "cover", minHeight: "360px" }}
+            />
+          </div>
+          <div className="col-md-7">
+            <div className="card-body p-4">
+              <h3 className="fw-bold">{product.title}</h3>
+              <p className="text-muted mb-2">Category: {product.category}</p>
+              <h4 className="text-primary mb-3">₹ {product.price}</h4>
+              <p className="mb-3">⭐ {product.rating}</p>
+              <p className="mb-0">
+                Premium quality product for your daily use.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
