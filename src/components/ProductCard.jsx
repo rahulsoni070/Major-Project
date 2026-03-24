@@ -4,36 +4,46 @@ import { getStableImage } from "../utils/productImages";
 function ProductCard({ product, setCart, setWishlist }) {
   const id = product._id || product.id;
 
-  function addToCart() {
+  const addToCart = () => {
     setCart((prev) => {
-      const existing = prev.find((p) => (p._id || p.id) === id);
+      const existing = prev.find((p) => (p._id || p.id) === id && (p.size || "M") === "M");
       if (existing) {
-        return prev.map((p) => ((p._id || p.id) === id ? { ...p, quantity: (p.quantity || 1) + 1 } : p));
+        return prev.map((p) =>
+          (p._id || p.id) === id && (p.size || "M") === "M"
+            ? { ...p, quantity: (p.quantity || 1) + 1 }
+            : p
+        );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, size: "M", quantity: 1 }];
     });
-  }
+  };
 
-  function addToWishlist() {
+  const addToWishlist = () => {
     setWishlist((prev) => {
       const exists = prev.some((p) => (p._id || p.id) === id);
       return exists ? prev : [...prev, product];
     });
-  }
+  };
 
   return (
     <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
       <Link to={`/products/${id}`} className="text-decoration-none text-dark">
-        <img src={getStableImage(product)} alt={product.title} className="card-img-top product-img" />
+        <img
+          src={getStableImage(product)}
+          alt={product.title}
+          className="w-100 product-img"
+        />
       </Link>
-      <div className="card-body d-flex flex-column">
-        <Link to={`/products/${id}`} className="text-decoration-none text-dark">
-          <h6 className="fw-semibold">{product.title}</h6>
-        </Link>
+      <div className="card-body">
+        <h6>{product.title}</h6>
         <p className="fw-bold text-primary mb-1">₹ {product.price}</p>
-        <small className="text-muted mb-3">⭐ {product.rating}</small>
-        <button className="btn btn-primary mt-auto mb-2" onClick={addToCart}>Add to Cart</button>
-        <button className="btn btn-outline-danger" onClick={addToWishlist}>Add to Wishlist</button>
+        <small className="text-muted">⭐ {product.rating}</small>
+        <button className="btn btn-primary w-100 mt-2" onClick={addToCart}>
+          Add to Cart
+        </button>
+        <button className="btn btn-outline-danger w-100 mt-2" onClick={addToWishlist}>
+          Add to Wishlist
+        </button>
       </div>
     </div>
   );

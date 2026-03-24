@@ -4,21 +4,21 @@ import { getStableImage } from "../utils/productImages";
 function Cart({ cart, setCart, setWishlist }) {
   const navigate = useNavigate();
 
-  const increaseQty = (id) => {
+  const increaseQty = (id, size) => {
     setCart((prev) =>
       prev.map((item) =>
-        (item._id || item.id) === id
+        (item._id || item.id) === id && (item.size || "M") === (size || "M")
           ? { ...item, quantity: (item.quantity || 1) + 1 }
           : item
       )
     );
   };
 
-  const decreaseQty = (id) => {
+  const decreaseQty = (id, size) => {
     setCart((prev) =>
       prev
         .map((item) =>
-          (item._id || item.id) === id
+          (item._id || item.id) === id && (item.size || "M") === (size || "M")
             ? { ...item, quantity: (item.quantity || 1) - 1 }
             : item
         )
@@ -26,17 +26,22 @@ function Cart({ cart, setCart, setWishlist }) {
     );
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => (item._id || item.id) !== id));
+  const removeFromCart = (id, size) => {
+    setCart((prev) =>
+      prev.filter(
+        (item) =>
+          !((item._id || item.id) === id && (item.size || "M") === (size || "M"))
+      )
+    );
   };
 
   const moveToWishlist = (item) => {
     const id = item._id || item.id;
     setWishlist((prev) => {
       const exists = prev.some((w) => (w._id || w.id) === id);
-      return exists ? prev : [...prev, item];
+      return exists ? prev : [...prev, { ...item }];
     });
-    removeFromCart(id);
+    removeFromCart(id, item.size || "M");
   };
 
   const totalItems = cart.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
@@ -49,9 +54,7 @@ function Cart({ cart, setCart, setWishlist }) {
     return (
       <div className="container py-5">
         <h3 className="fw-bold mb-3">MY CART (0)</h3>
-        <div className="card p-5 text-center border-0 shadow-sm rounded-4">
-          Your cart is empty
-        </div>
+        <div className="card p-5 text-center border-0 shadow-sm rounded-4">Your cart is empty</div>
       </div>
     );
   }
@@ -63,30 +66,34 @@ function Cart({ cart, setCart, setWishlist }) {
         <div className="col-12 col-lg-7">
           {cart.map((item) => {
             const id = item._id || item.id;
+            const size = item.size || "M";
             const price = Number(item.price || 0);
             const original = Math.round(price * 1.5);
+
             return (
-              <div key={id} className="card border-0 shadow-sm rounded-3 p-3 mb-3">
+              <div key={`${id}-${size}`} className="card border-0 shadow-sm rounded-3 p-3 mb-3">
                 <div className="row g-3 align-items-center">
                   <div className="col-4 col-md-3">
                     <img src={getStableImage(item)} alt={item.title} className="w-100 rounded-2" style={{ height: 140, objectFit: "cover" }} />
                   </div>
                   <div className="col-8 col-md-9">
                     <h6 className="mb-1">{item.title}</h6>
-                    {item.size && <small className="d-block text-muted mb-1">Size: {item.size}</small>}
+                    <small className="d-block text-muted mb-1">Size: {size}</small>
                     <div className="d-flex align-items-center gap-2 mb-1">
                       <span className="fw-bold fs-5">₹{price}</span>
                       <small className="text-muted text-decoration-line-through">₹{original}</small>
                     </div>
                     <small className="text-success">50% off</small>
+
                     <div className="d-flex align-items-center gap-2 mt-2 mb-3">
                       <small className="fw-semibold">Quantity:</small>
-                      <button className="btn btn-sm btn-outline-secondary" onClick={() => decreaseQty(id)}>−</button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => decreaseQty(id, size)}>−</button>
                       <span>{item.quantity || 1}</span>
-                      <button className="btn btn-sm btn-outline-secondary" onClick={() => increaseQty(id)}>+</button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => increaseQty(id, size)}>+</button>
                     </div>
+
                     <div className="d-grid gap-2 d-md-flex">
-                      <button className="btn btn-outline-dark btn-sm" onClick={() => removeFromCart(id)}>Remove from Cart</button>
+                      <button className="btn btn-outline-dark btn-sm" onClick={() => removeFromCart(id, size)}>Remove from Cart</button>
                       <button className="btn btn-outline-secondary btn-sm" onClick={() => moveToWishlist(item)}>Move to Wishlist</button>
                     </div>
                   </div>

@@ -5,7 +5,6 @@ import { getStableImage } from "../utils/productImages";
 
 function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
   const { id } = useParams();
-
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
@@ -22,8 +21,10 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
   }, [id]);
 
   const pid = product?._id || product?.id;
-  const inCart = cart.some((i) => (i._id || i.id) === pid);
   const inWishlist = wishlist.some((i) => (i._id || i.id) === pid);
+  const inCartSameSize = cart.some(
+    (i) => (i._id || i.id) === pid && (i.size || "M") === size
+  );
 
   const originalPrice = useMemo(() => {
     if (!product) return 0;
@@ -38,27 +39,29 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
       .slice(0, 4);
   }, [products, product, pid]);
 
-  function addToCart() {
+  const addToCart = () => {
     if (!product) return;
     setCart((prev) => {
-      const existing = prev.find((p) => (p._id || p.id) === pid);
+      const existing = prev.find(
+        (p) => (p._id || p.id) === pid && (p.size || "M") === size
+      );
       if (existing) {
         return prev.map((p) =>
-          (p._id || p.id) === pid
-            ? { ...p, quantity: (p.quantity || 1) + qty, size }
+          (p._id || p.id) === pid && (p.size || "M") === size
+            ? { ...p, quantity: (p.quantity || 1) + qty }
             : p
         );
       }
       return [...prev, { ...product, quantity: qty, size }];
     });
-  }
+  };
 
-  function addToWishlist() {
+  const addToWishlist = () => {
     if (!product) return;
     setWishlist((prev) =>
       prev.some((p) => (p._id || p.id) === pid) ? prev : [...prev, product]
     );
-  }
+  };
 
   if (!product) return <div className="container py-5">Loading product...</div>;
 
@@ -82,7 +85,7 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
 
             <div className="d-grid gap-2 mt-3">
               <button className="btn btn-primary" onClick={addToCart}>
-                {inCart ? "Add More to Cart" : "Add to Cart"}
+                {inCartSameSize ? `Add More (${size})` : `Add to Cart (${size})`}
               </button>
               <button
                 className="btn btn-outline-danger"
@@ -101,59 +104,28 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
 
             <div className="d-flex align-items-center gap-2 mb-1">
               <h3 className="text-dark mb-0">₹{product.price}</h3>
-              <small className="text-muted text-decoration-line-through">
-                ₹{originalPrice}
-              </small>
+              <small className="text-muted text-decoration-line-through">₹{originalPrice}</small>
             </div>
             <small className="text-success fw-semibold">50% off</small>
 
-            {/* Quantity */}
             <div className="mt-3 d-flex align-items-center gap-2">
               <span className="fw-semibold">Quantity:</span>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-              >
-                −
-              </button>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
               <span>{qty}</span>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setQty((q) => q + 1)}
-              >
-                +
-              </button>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setQty((q) => q + 1)}>+</button>
             </div>
 
-            {/* Size */}
             <div className="mt-3 d-flex align-items-center gap-2 flex-wrap">
               <span className="fw-semibold me-1">Size:</span>
               {["S", "M", "L", "XL"].map((s) => (
                 <button
                   key={s}
-                  className={`btn btn-sm ${
-                    size === s ? "btn-primary" : "btn-outline-secondary"
-                  }`}
+                  className={`btn btn-sm ${size === s ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => setSize(s)}
                 >
                   {s}
                 </button>
               ))}
-            </div>
-
-            <div className="row g-2 mt-3">
-              <div className="col-6 col-md-3">
-                <div className="border rounded-3 p-2 text-center small">🚚 Fast Delivery</div>
-              </div>
-              <div className="col-6 col-md-3">
-                <div className="border rounded-3 p-2 text-center small">💸 Pay on Delivery</div>
-              </div>
-              <div className="col-6 col-md-3">
-                <div className="border rounded-3 p-2 text-center small">🔁 Easy Return</div>
-              </div>
-              <div className="col-6 col-md-3">
-                <div className="border rounded-3 p-2 text-center small">🔒 Secure Payment</div>
-              </div>
             </div>
 
             <hr className="my-4" />
@@ -166,7 +138,7 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
             </ul>
           </div>
         </div>
-        
+
         {related.length > 0 && (
           <>
             <hr className="my-4" />
@@ -174,16 +146,9 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
             <div className="row g-3">
               {related.map((item) => (
                 <div key={item._id || item.id} className="col-6 col-md-3">
-                  <Link
-                    to={`/products/${item._id || item.id}`}
-                    className="text-decoration-none text-dark"
-                  >
+                  <Link to={`/products/${item._id || item.id}`} className="text-decoration-none text-dark">
                     <div className="card h-100 border-0 shadow-sm">
-                      <img
-                        src={getStableImage(item)}
-                        alt={item.title}
-                        style={{ height: 160, objectFit: "cover" }}
-                      />
+                      <img src={getStableImage(item)} alt={item.title} style={{ height: 160, objectFit: "cover" }} />
                       <div className="card-body p-2">
                         <p className="small mb-1">{item.title}</p>
                         <p className="fw-bold mb-0">₹{item.price}</p>
