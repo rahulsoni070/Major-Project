@@ -1,23 +1,29 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
+import Footer from "./components/Footer";
 import "./App.css";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem("cart") || "[]"));
   const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem("wishlist") || "[]"));
-  const [addresses, setAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [addresses, setAddresses] = useState(() => JSON.parse(localStorage.getItem("addresses") || "[]"));
+  const [selectedAddressId, setSelectedAddressId] = useState(() => localStorage.getItem("selectedAddressId") || null);
 
   useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
   useEffect(() => localStorage.setItem("wishlist", JSON.stringify(wishlist)), [wishlist]);
+  useEffect(() => localStorage.setItem("addresses", JSON.stringify(addresses)), [addresses]);
+  useEffect(() => {
+    if (selectedAddressId) localStorage.setItem("selectedAddressId", selectedAddressId);
+  }, [selectedAddressId]);
 
   return (
     <div className="app-shell">
@@ -27,11 +33,9 @@ function App() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
-
-      <main className="pb-5">
+      <main className="main-content pb-5">
         <Routes>
-          <Route path="/" element={<Navigate to="/products" replace />} />
-
+          <Route path="/" element={<Home setCart={setCart} setWishlist={setWishlist} />} />
           <Route
             path="/products"
             element={
@@ -44,7 +48,6 @@ function App() {
               />
             }
           />
-
           <Route
             path="/products/:id"
             element={
@@ -56,7 +59,6 @@ function App() {
               />
             }
           />
-
           <Route
             path="/cart"
             element={
@@ -68,7 +70,6 @@ function App() {
               />
             }
           />
-
           <Route
             path="/wishlist"
             element={
@@ -80,9 +81,7 @@ function App() {
               />
             }
           />
-
           <Route path="/profile" element={<Profile />} />
-
           <Route
             path="/checkout"
             element={
@@ -96,10 +95,10 @@ function App() {
               />
             }
           />
-
-          <Route path="*" element={<Navigate to="/products" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }
