@@ -57,13 +57,33 @@ function App() {
             }
           />
 
-          <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
+          {/* ✅ UPDATED: pass wishlist + setWishlist to Cart */}
+          <Route
+            path="/cart"
+            element={
+              <Cart
+                cart={cart}
+                setCart={setCart}
+                wishlist={wishlist}
+                setWishlist={setWishlist}
+              />
+            }
+          />
+
           <Route
             path="/wishlist"
-            element={<Wishlist wishlist={wishlist} setWishlist={setWishlist} cart={cart} setCart={setCart} />}
+            element={
+              <Wishlist
+                wishlist={wishlist}
+                setWishlist={setWishlist}
+                cart={cart}
+                setCart={setCart}
+              />
+            }
           />
 
           <Route path="/profile" element={<Profile />} />
+
           <Route
             path="/checkout"
             element={

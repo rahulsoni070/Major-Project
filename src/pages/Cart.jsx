@@ -64,7 +64,6 @@ function Cart({ cart, setCart, wishlist = [], setWishlist = () => {} }) {
       <h4 className="fw-bold text-center mb-4">MY CART ({totalItems})</h4>
 
       <div className="row g-4">
-        {/* Left: cart items */}
         <div className="col-lg-7">
           {cart.map((item) => {
             const id = item._id || item.id;
@@ -119,7 +118,6 @@ function Cart({ cart, setCart, wishlist = [], setWishlist = () => {} }) {
           })}
         </div>
 
-        {/* Right: price details */}
         <div className="col-lg-5">
           <div className="card border-0 shadow-sm rounded-3 p-3 sticky-top" style={{ top: 90 }}>
             <h6 className="fw-bold mb-3">PRICE DETAILS</h6>
