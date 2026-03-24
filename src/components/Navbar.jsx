@@ -42,8 +42,15 @@ function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
           </Link>
 
           <Link to="/wishlist" className="btn btn-outline-danger">
-            Wishlist
-            {wishlistCount > 0 && <span className="ms-1">({wishlistCount})</span>}
+            Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ""}
+          </Link>
+
+          <Link to="/orders" className="btn btn-outline-dark">
+            My Orders
+          </Link>
+
+          <Link to="/profile" className="btn btn-outline-secondary">
+            Profile
           </Link>
         </div>
       </div>
