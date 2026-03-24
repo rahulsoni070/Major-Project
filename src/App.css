@@ -70,9 +70,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #111827;
 }
 
-@media (max-width: 1360px) {
-  .app-shell {
-    width: 100%;
-    max-width: 100%;
+@media (max-width: 767.98px) {
+  .nav-actions .btn {
+    min-width: 42px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }

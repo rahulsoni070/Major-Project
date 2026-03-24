@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
   const navigate = useNavigate();
-
   const cartCount = cart.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
   const wishlistCount = wishlist.length;
 
@@ -26,14 +25,13 @@ function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="btn btn-success" type="submit">
-            Search
-          </button>
+          <button className="btn btn-success" type="submit">Search</button>
         </form>
 
-        <div className="d-flex align-items-center gap-2">
-          <Link to="/cart" className="btn btn-outline-primary position-relative">
-            Cart
+        <div className="d-flex align-items-center gap-2 nav-actions">
+          <Link to="/cart" className="btn btn-outline-primary position-relative" aria-label="Cart">
+            <span className="d-inline d-md-none">🛒</span>
+            <span className="d-none d-md-inline">Cart</span>
             {cartCount > 0 && (
               <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {cartCount}
@@ -41,16 +39,19 @@ function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
             )}
           </Link>
 
-          <Link to="/wishlist" className="btn btn-outline-danger">
-            Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ""}
+          <Link to="/wishlist" className="btn btn-outline-danger" aria-label="Wishlist">
+            <span className="d-inline d-md-none">❤️</span>
+            <span className="d-none d-md-inline">Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ""}</span>
           </Link>
 
-          <Link to="/orders" className="btn btn-outline-dark">
-            My Orders
+          <Link to="/orders" className="btn btn-outline-dark" aria-label="My Orders">
+            <span className="d-inline d-md-none">📦</span>
+            <span className="d-none d-md-inline">My Orders</span>
           </Link>
 
-          <Link to="/profile" className="btn btn-outline-secondary">
-            Profile
+          <Link to="/profile" className="btn btn-outline-secondary" aria-label="Profile">
+            <span className="d-inline d-md-none">👤</span>
+            <span className="d-none d-md-inline">Profile</span>
           </Link>
         </div>
       </div>

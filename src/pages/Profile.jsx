@@ -2,20 +2,33 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 function Profile() {
-  const [profile, setProfile] = useState(() => {
-    const saved = localStorage.getItem("profile");
-    return saved
-      ? JSON.parse(saved)
-      : { name: "", email: "", phone: "" };
-  });
+  const [profile, setProfile] = useState({ name: "", email: "", phone: "" });
 
   useEffect(() => {
-    localStorage.setItem("profile", JSON.stringify(profile));
-  }, [profile]);
+    const saved = localStorage.getItem("profile");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      setProfile({
+        name: parsed?.name || "",
+        email: parsed?.email || "",
+        phone: parsed?.phone || ""
+      });
+    } catch {
+      setProfile({ name: "", email: "", phone: "" });
+    }
+  }, []);
 
   const onSave = (e) => {
     e.preventDefault();
-    toast.success("Profile updated");
+
+    if (!profile.name.trim() || !profile.email.trim() || !profile.phone.trim()) {
+      toast.error("Please fill all profile fields");
+      return;
+    }
+
+    localStorage.setItem("profile", JSON.stringify(profile));
+    toast.success("Profile saved successfully");
   };
 
   return (
@@ -55,7 +68,7 @@ function Profile() {
           </div>
 
           <div className="col-12">
-            <button className="btn btn-primary">Save Profile</button>
+            <button type="submit" className="btn btn-primary">Save Profile</button>
           </div>
         </form>
       </div>
