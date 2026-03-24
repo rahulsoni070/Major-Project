@@ -70,7 +70,6 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
 
       <div className="card border-0 shadow-sm rounded-4 p-3 p-md-4">
         <div className="row g-4">
-          {/* Left image + action */}
           <div className="col-md-4">
             <div className="border rounded-3 p-2 bg-light">
               <img
@@ -95,7 +94,6 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
             </div>
           </div>
 
-          {/* Right details */}
           <div className="col-md-8">
             <h3 className="fw-bold mb-2">{product.title}</h3>
             <p className="text-muted mb-1">Category: {product.category}</p>
@@ -143,7 +141,6 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
               ))}
             </div>
 
-            {/* Delivery badges */}
             <div className="row g-2 mt-3">
               <div className="col-6 col-md-3">
                 <div className="border rounded-3 p-2 text-center small">🚚 Fast Delivery</div>
@@ -159,7 +156,6 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
               </div>
             </div>
 
-            {/* Description */}
             <hr className="my-4" />
             <h6 className="fw-bold">Description</h6>
             <ul className="small text-muted ps-3 mb-0">
@@ -170,8 +166,7 @@ function ProductDetails({ cart, setCart, wishlist, setWishlist }) {
             </ul>
           </div>
         </div>
-
-        {/* Related products */}
+        
         {related.length > 0 && (
           <>
             <hr className="my-4" />

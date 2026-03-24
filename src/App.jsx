@@ -57,7 +57,6 @@ function App() {
             }
           />
 
-          {/* ✅ UPDATED: pass wishlist + setWishlist to Cart */}
           <Route
             path="/cart"
             element={
