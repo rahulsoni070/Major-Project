@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
   const navigate = useNavigate();
+
   const cartCount = cart.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
   const wishlistCount = wishlist.length;
 
@@ -25,7 +26,9 @@ function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="btn btn-success" type="submit">Search</button>
+          <button className="btn btn-success" type="submit">
+            Search
+          </button>
         </form>
 
         <div className="d-flex align-items-center gap-2 nav-actions">
@@ -39,9 +42,14 @@ function Navbar({ cart = [], wishlist = [], searchTerm, setSearchTerm }) {
             )}
           </Link>
 
-          <Link to="/wishlist" className="btn btn-outline-danger" aria-label="Wishlist">
+          <Link to="/wishlist" className="btn btn-outline-danger position-relative" aria-label="Wishlist">
             <span className="d-inline d-md-none">❤️</span>
-            <span className="d-none d-md-inline">Wishlist {wishlistCount > 0 ? `(${wishlistCount})` : ""}</span>
+            <span className="d-none d-md-inline">Wishlist</span>
+            {wishlistCount > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {wishlistCount}
+              </span>
+            )}
           </Link>
 
           <Link to="/orders" className="btn btn-outline-dark" aria-label="My Orders">
