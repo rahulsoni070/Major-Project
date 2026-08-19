@@ -29,8 +29,8 @@ This project has two separate repos: a frontend and a backend.
 **Backend**
 
 ```bash
-git clone https://github.com/rahulsoni070/M-ecommerce-backend.git
-cd M-ecommerce-backend
+git clone https://github.com/rahulsoni070/shopeasy-backend.git
+cd shopeasy-backend
 npm install
 npm run dev
 ```
@@ -38,8 +38,8 @@ npm run dev
 **Frontend**
 
 ```bash
-git clone https://github.com/rahulsoni070/Major-Project.git
-cd Major-Project
+git clone https://github.com/rahulsoni070/shopeasy-frontend.git
+cd shopeasy-frontend
 npm install
 npm run dev
 ```
