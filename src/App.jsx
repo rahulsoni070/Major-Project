@@ -10,6 +10,8 @@ import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import OrderHistory from "./pages/OrderHistory";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Footer from "./components/Footer";
 import "./App.css";
 
@@ -73,6 +75,8 @@ function App() {
             element={<Wishlist wishlist={wishlist} setWishlist={setWishlist} cart={cart} setCart={setCart} />}
           />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/checkout"
             element={

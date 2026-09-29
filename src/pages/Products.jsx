@@ -1,13 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { BASE_URL } from "../utils/api";
 
 function Products({ setCart, setWishlist, searchTerm = "" }) {
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
   const [products, setProducts] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(() => {
+    return categoryParam ? [categoryParam.toLowerCase()] : [];
+  });
   const [minRating, setMinRating] = useState(0);
   const [sortByPrice, setSortByPrice] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategories([categoryParam.toLowerCase()]);
+    }
+  }, [categoryParam]);
 
   const normalizeCategory = (cat = "") => {
     const c = cat.toLowerCase();

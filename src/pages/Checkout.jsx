@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
+import { ShieldCheck, Truck, User } from "lucide-react";
 
 function Checkout({
   cart,
@@ -13,8 +15,19 @@ function Checkout({
   setOrders
 }) {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [form, setForm] = useState({ id: "", name: "", city: "", state: "", pincode: "", phone: "" });
   const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    if (user && !form.name && !form.phone) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        phone: prev.phone || user.phone || ""
+      }));
+    }
+  }, [user]);
 
   const totalItems = cart.reduce((s, i) => s + Number(i.quantity || 1), 0);
   const subtotal = cart.reduce((s, i) => s + Number(i.price || 0) * Number(i.quantity || 1), 0);
